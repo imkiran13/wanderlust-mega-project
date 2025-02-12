@@ -1,9 +1,9 @@
 @Library('Shared') _
 pipeline {
-    agent {label 'Node'}
+    agent any
     
     environment{
-        SONAR_HOME = tool "Sonar"
+        SONAR_HOME = tool "sonar"
     }
     
     parameters {
@@ -32,7 +32,7 @@ pipeline {
         stage('Git: Code Checkout') {
             steps {
                 script{
-                    code_checkout("https://github.com/LondheShubham153/Wanderlust-Mega-Project.git","main")
+                    code_checkout("https://github.com/imkiran13/wanderlust-mega-project.git","main")
                 }
             }
         }
@@ -56,7 +56,7 @@ pipeline {
         stage("SonarQube: Code Analysis"){
             steps{
                 script{
-                    sonarqube_analysis("Sonar","wanderlust","wanderlust")
+                    sonarqube_analysis("sonar-scanner","wanderlust","wanderlust")
                 }
             }
         }
@@ -97,11 +97,11 @@ pipeline {
             steps{
                 script{
                         dir('backend'){
-                            docker_build("wanderlust-backend-beta","${params.BACKEND_DOCKER_TAG}","trainwithshubham")
+                            docker_build("wanderlust-backend-beta","${params.BACKEND_DOCKER_TAG}","imkiran13")
                         }
                     
                         dir('frontend'){
-                            docker_build("wanderlust-frontend-beta","${params.FRONTEND_DOCKER_TAG}","trainwithshubham")
+                            docker_build("wanderlust-frontend-beta","${params.FRONTEND_DOCKER_TAG}","imkiran13")
                         }
                 }
             }
@@ -110,8 +110,8 @@ pipeline {
         stage("Docker: Push to DockerHub"){
             steps{
                 script{
-                    docker_push("wanderlust-backend-beta","${params.BACKEND_DOCKER_TAG}","trainwithshubham") 
-                    docker_push("wanderlust-frontend-beta","${params.FRONTEND_DOCKER_TAG}","trainwithshubham")
+                    docker_push("wanderlust-backend-beta","${params.BACKEND_DOCKER_TAG}","imkiran13") 
+                    docker_push("wanderlust-frontend-beta","${params.FRONTEND_DOCKER_TAG}","imkiran13")
                 }
             }
         }
@@ -119,7 +119,7 @@ pipeline {
     post{
         success{
             archiveArtifacts artifacts: '*.xml', followSymlinks: false
-            build job: "Wanderlust-CD", parameters: [
+            build job: "wanderlust-CD", parameters: [
                 string(name: 'FRONTEND_DOCKER_TAG', value: "${params.FRONTEND_DOCKER_TAG}"),
                 string(name: 'BACKEND_DOCKER_TAG', value: "${params.BACKEND_DOCKER_TAG}")
             ]
